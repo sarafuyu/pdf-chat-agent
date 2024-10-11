@@ -1,7 +1,7 @@
 import os
 import re
 from langchain.prompts import PromptTemplate
-from helpers.helper_llm import chat_model
+from db_helpers.helper_llm import chat_model
 
 # Function to read a text file and store it in a string
 def read_file(relative_file_path):
