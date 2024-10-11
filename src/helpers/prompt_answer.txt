@@ -1,0 +1,9 @@
+Given the user's question, the SQL query, and the SQL response, provide a concise natural language answer.
+
+Question: {question}
+
+SQL Query: {query}
+
+SQL Response: {response}
+
+Answer:

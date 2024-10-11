@@ -1,17 +1,18 @@
+import os
 import re
 from langchain.prompts import PromptTemplate
 from helpers.helper_llm import chat_model
 
+# Function to read a text file and store it in a string
+def read_file(relative_file_path):
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(current_dir, relative_file_path)
+    with open(file_path, 'r') as file:
+        file_content = file.read() 
+    return file_content
+
 # Create the prompt template for generating SQL queries
-template_sql = """You are a SQL expert. Given the following database schema, generate a SQL query to answer the user's question.
-
-Schema:
-{schema}
-
-Question: {question}
-
-Please provide only the SQL query, without any additional text or explanations."""
-
+template_sql = read_file('prompt_question.txt')
 prompt_sql = PromptTemplate(input_variables=["schema", "question"], template=template_sql)
 
 # Function to generate SQL query from user's question
@@ -38,16 +39,7 @@ def generate_sql_query(question, schema):
     return sql_query
 
 # Create the prompt template for generating the final answer
-template_response = """Given the user's question, the SQL query, and the SQL response, provide a concise natural language answer.
-
-Question: {question}
-
-SQL Query: {query}
-
-SQL Response: {response}
-
-Answer:"""
-
+template_response = read_file('prompt_answer.txt')
 prompt_response = PromptTemplate(
     input_variables=["question", "query", "response"],
     template=template_response
