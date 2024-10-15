@@ -1,10 +1,16 @@
 import os
-from langchain.document_loaders import PyPDFLoader
+from langchain_community.document_loaders import PyPDFLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 
-# Function to load PDF file content of a given PDF
-def load_pdf(relative_file_path):
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(current_dir, relative_file_path)
-    loader = PyPDFLoader(file_path)
-    pages = loader.load()
-    return pages
+def load_and_process_pdf(file):
+    print(f"Loading PDF: {file}") 
+
+    # Load documents
+    loader = PyPDFLoader(file)
+    documents = loader.load()
+
+    # Split documents
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=250, chunk_overlap=0)
+    docs = text_splitter.split_documents(documents)
+
+    return docs
