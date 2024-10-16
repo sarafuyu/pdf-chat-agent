@@ -4,7 +4,7 @@ from db_helpers.helper_prompt import generate_sql_query, generate_final_answer
 from langchain_community.utilities import SQLDatabase
 
 from pdf_helpers.helper_pdf_processing import load_and_process_pdf
-from pdf_helpers.helper_llm import create_vectorstore
+from pdf_helpers.helper_vector_db import create_vectorstore
 from pdf_helpers.helper_conversation_chain import create_qa_chain
 
 # Database chat agent logic
@@ -14,7 +14,7 @@ def database_agent(mysql_uri=None, user_question=None):
     db = SQLDatabase.from_uri(mysql_uri)
     
     if not user_question:
-        user_question = 'how many albums are there in the database?'  # Default question
+        user_question = 'How many albums are there in the database?'  # Default question
 
     # Generate SQL query from the user question
     schema = get_schema(db)
@@ -30,7 +30,7 @@ def database_agent(mysql_uri=None, user_question=None):
 
 
 # PDF chat agent logic
-def pdf_agent(file_path=None, user_question=None):
+def pdf_processing(file_path=None):
     if not file_path:
         file_path = "C:/Users/esaydrr/OneDrive - Ericsson/Desktop/dna-projects/pdf-chat-agent/src/data/pdfs/Animal_facts.pdf"  # Default PDF
 
@@ -43,9 +43,10 @@ def pdf_agent(file_path=None, user_question=None):
     # Create the conversational chain
     qa_chain = create_qa_chain(retriever)
     
-    if not user_question:
-        user_question = "What is the length of the giraffe's tongue?"  # Default question
+    return qa_chain
 
+def pdf_agent(qa_chain, user_question):
+    
     # Process the query
     response = qa_chain.invoke({"question": user_question, "chat_history": []})
     answer = response.get('answer', 'No answer generated.')

@@ -1,5 +1,6 @@
 import streamlit as st
-from agent_logic import database_agent, pdf_agent
+from agent_logic import database_agent, pdf_processing, pdf_agent
+import os
 
 from langchain_community.document_loaders import PyPDFLoader  # Import PyPDFLoader for loading PDFs
 from langchain_community.embeddings import HuggingFaceEmbeddings  # Corrected import for embeddings
@@ -49,33 +50,45 @@ def main():
         # File uploader for the PDF
         uploaded_file = st.file_uploader("Upload a PDF file", type=["pdf"])
 
+        # User input for the question
+        user_question = st.text_input("Ask a question about the PDF:", 
+                                        value="What is the length of the giraffe's tongue?")
+
+        # Path to the pre-selected PDF file
+        default_pdf_path = "data/pdfs/sample.pdf"
+
+        # Check if the user has uploaded a file, otherwise use the default file
         if uploaded_file:
             st.success("PDF uploaded successfully!")
-            with st.spinner("Processing PDF..."):
-                # Save the uploaded PDF to a temporary file
-                with open("temp_pdf.pdf", "wb") as f:
-                    f.write(uploaded_file.getbuffer())
-
-                # User input for the question
-                user_question = st.text_input("Ask a question about the PDF:", 
-                                              value="What is the length of the giraffe's tongue?")
-                
-                # Call the PDF agent with the uploaded PDF
-                if st.button("Ask Question"):
-                    with st.spinner("Generating answer..."):
-                        answer, source_documents = pdf_agent("temp_pdf.pdf", user_question)
-
-                        st.write("Answer:")
-                        st.success(answer)
-
-                        # Show sources if available
-                        if source_documents:
-                            st.write("\n--- Answer Sources ---")
-                            top_source = source_documents[0]
-                            st.write(f"Source: {top_source.metadata['source']}")
-                            st.write(top_source.page_content)
         else:
-            st.warning("Please upload a PDF file to proceed.")
+            st.info(f"No file uploaded, checking default file: {default_pdf_path}")
+            # Open the default file if the user doesn't upload one
+            if os.path.exists(default_pdf_path):
+                uploaded_file = default_pdf_path # open(default_pdf_path, "rb")
+                st.success("Using the default PDF file.")
+            else:
+                st.error(f"Default file not found: {default_pdf_path}")
+                st.warning("Please upload a PDF file to proceed.")
+                return # Stop execution if neither a file is uploaded nor a default file exists
+
+        with st.spinner("Processing PDF..."):
+            qa_chain = pdf_processing(uploaded_file)
+            
+        # Call the PDF agent with the uploaded PDF
+        if st.button("Ask Question"):
+            with st.spinner("Generating answer..."):
+                answer, source_documents = pdf_agent(qa_chain, user_question)
+
+                st.write("Answer: ")
+                st.success(answer)
+
+                # Show sources if available
+                if source_documents:
+                    st.write("Answer Source: ")
+                    top_source = source_documents[0]
+                    st.write(f"Source: {top_source.metadata['source']}")
+                    st.write(top_source.page_content)
+    
 
 if __name__ == '__main__':
     main()
