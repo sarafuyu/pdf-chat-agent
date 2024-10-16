@@ -30,7 +30,12 @@ def database_agent(mysql_uri=None, user_question=None):
 
 
 # PDF chat agent logic
+<<<<<<< Updated upstream
 def pdf_processing(file_path=None):
+=======
+
+def pdf_loading(file_path):
+>>>>>>> Stashed changes
     if not file_path:
         file_path = "C:/Users/esaydrr/OneDrive - Ericsson/Desktop/dna-projects/pdf-chat-agent/src/data/pdfs/Animal_facts.pdf"  # Default PDF
 
@@ -42,6 +47,11 @@ def pdf_processing(file_path=None):
     
     # Create the conversational chain
     qa_chain = create_qa_chain(retriever)
+
+    return qa_chain
+
+def pdf_agent(qa_chain, user_question=None):
+    
     
     return qa_chain
 

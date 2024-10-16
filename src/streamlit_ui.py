@@ -1,6 +1,10 @@
 import streamlit as st
+<<<<<<< Updated upstream
 from agent_logic import database_agent, pdf_processing, pdf_agent
 import os
+=======
+from agent_logic import database_agent, pdf_loading, pdf_agent
+>>>>>>> Stashed changes
 
 from langchain_community.document_loaders import PyPDFLoader  # Import PyPDFLoader for loading PDFs
 from langchain_community.embeddings import HuggingFaceEmbeddings  # Corrected import for embeddings
@@ -50,6 +54,7 @@ def main():
         # File uploader for the PDF
         uploaded_file = st.file_uploader("Upload a PDF file", type=["pdf"])
 
+<<<<<<< Updated upstream
         # User input for the question
         user_question = st.text_input("Ask a question about the PDF:", 
                                         value="What is the length of the giraffe's tongue?")
@@ -89,6 +94,49 @@ def main():
                     st.write(f"Source: {top_source.metadata['source']}")
                     st.write(top_source.page_content)
     
+=======
+        # Conversation chain initialization
+        qa_chain = None
 
+        # Load the pdf needed for the agent
+        if st.button("Process PDF"):
+            
+            # Given valid path load vector database
+            if uploaded_file:
+                
+                with st.spinner("Processing PDF..."):
+
+                    # TODO: remove? Save the uploaded PDF to a temporary file
+                    with open("data/pdfs/temp_pdf.pdf", "wb") as f:
+                        f.write(uploaded_file.getbuffer())
+
+                    # Creating the conversation chain connected to the pdf's db 
+                    qa_chain = pdf_loading("data/pdfs/temp_pdf.pdf")
+                    st.success("PDF uploaded successfully!")
+            else:
+                st.warning("Please upload a valid PDF file to proceed.")
+>>>>>>> Stashed changes
+
+            # User input for the question
+            user_question = st.text_input("Ask a question about the PDF:", 
+                                        value="What is the length of the giraffe's tongue?")
+    
+            # Call the PDF agent with the uploaded PDF
+            if st.button("Ask Question"):
+                
+                with st.spinner("Generating answer..."):
+                    answer, source_documents = pdf_agent(qa_chain, user_question)
+
+                    st.write("Answer:")
+                    st.success(answer)
+
+                    # Show sources if available
+                    if source_documents:
+                        st.write("\n--- Answer Sources ---")
+                        top_source = source_documents[0]
+                        st.write(f"Source: {top_source.metadata['source']}")
+                        st.write(top_source.page_content)
+                
+        
 if __name__ == '__main__':
     main()
