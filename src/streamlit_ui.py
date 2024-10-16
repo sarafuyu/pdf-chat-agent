@@ -29,8 +29,8 @@ def main():
                                       value="how many albums are there in the database?")
         
         # Button to process the query
-        if st.button("Run Query"):
-            with st.spinner("Running query..."):
+        if st.button("Run Agent"):
+            with st.spinner("Running agent..."):
                 sql_query, sql_response, final_answer = database_agent(mysql_uri, user_question)
                 
                 # Display results
@@ -53,26 +53,26 @@ def main():
             st.success("PDF uploaded successfully!")
             with st.spinner("Processing PDF..."):
                 # Save the uploaded PDF to a temporary file
-                with open("temp_pdf.pdf", "wb") as f:
+                with open("data/pdfs/temp_pdf.pdf", "wb") as f:
                     f.write(uploaded_file.getbuffer())
 
                 # User input for the question
-                user_question = st.text_input("Ask a question about the PDF:", 
+                user_question = st.text_input("Ask a question about the PDF", 
                                               value="What is the length of the giraffe's tongue?")
                 
                 # Call the PDF agent with the uploaded PDF
-                if st.button("Ask Question"):
+                if st.button("Run Agent"):
                     with st.spinner("Generating answer..."):
-                        answer, source_documents = pdf_agent("temp_pdf.pdf", user_question)
+                        answer, source_documents = pdf_agent("data/pdfs/temp_pdf.pdf", user_question)
 
                         st.write("Answer:")
                         st.success(answer)
 
                         # Show sources if available
                         if source_documents:
-                            st.write("\n--- Answer Sources ---")
+                            st.write("Answer Source")
                             top_source = source_documents[0]
-                            st.write(f"Source: {top_source.metadata['source']}")
+                            # st.write(f"Source: {top_source.metadata['source']}")
                             st.write(top_source.page_content)
         else:
             st.warning("Please upload a PDF file to proceed.")
