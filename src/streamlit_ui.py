@@ -31,7 +31,7 @@ def main():
         
         # Input for the user's database query
         user_question = st.text_input("Ask a question about the database", 
-                                      value="how many albums are there in the database?")
+                                      value="How many albums are there in the database?")
         
         # Button to process the query
         if st.button("Run Query"):
@@ -52,7 +52,7 @@ def main():
         st.subheader("PDF Agent")
 
         # File uploader for the PDF
-        uploaded_file = st.file_uploader("Upload a PDF file", type=["pdf"])
+        uploaded_file = st.file_uploader("Upload a PDF file", type=["pdf"], accept_multiple_files=True)
 
 <<<<<<< Updated upstream
         # User input for the question
@@ -65,6 +65,39 @@ def main():
         # Check if the user has uploaded a file, otherwise use the default file
         if uploaded_file:
             st.success("PDF uploaded successfully!")
+<<<<<<< Updated upstream
+=======
+
+            # User input for the question
+            user_question = st.text_input("Ask a question about the PDF", 
+                                              value="What is the length of the giraffe's tongue?") 
+            with st.spinner("Processing PDF..."):
+                # Save the uploaded PDF to a temporary file
+                i=0
+                files = []
+                for file in uploaded_file: 
+                    i+=1
+                    name = "data/pdfs/temp/temp_pdf" + str(i) + ".pdf"
+                    files.add(name)
+                    
+                    with open(name, "wb") as f:
+                        f.write(file.getbuffer())
+                
+                # Call the PDF agent with the uploaded PDF
+                if st.button("Run Agent"):
+                    with st.spinner("Generating answer..."):
+                        answer, source_documents = pdf_agent(files, user_question)
+
+                        st.write("Answer:")
+                        st.success(answer)
+
+                        # Show sources if available
+                        if source_documents:
+                            st.write("Answer Source")
+                            top_source = source_documents[0]
+                            # st.write(f"Source: {top_source.metadata['source']}")
+                            st.code(top_source.page_content)
+>>>>>>> Stashed changes
         else:
             st.info(f"No file uploaded, checking default file: {default_pdf_path}")
             # Open the default file if the user doesn't upload one
