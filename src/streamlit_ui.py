@@ -13,35 +13,49 @@ from langchain_huggingface import HuggingFaceEndpoint  # Keep this import as is
 def main():
     st.set_page_config(page_title="Database & PDF Chat Agents", page_icon=":books:")
     st.header("Chat with Database or PDF")
-    
+
+    # Initialize conversation history
+    if "db_chat_history" not in st.session_state:
+        st.session_state.db_chat_history = []
+
     # Selection for either the database agent or the PDF agent
     agent_choice = st.sidebar.radio("Select Agent", ("Database Agent", "PDF Agent"))
 
     if agent_choice == "Database Agent":
         st.subheader("Database Agent")
-        
+
         # Input for the MySQL connection URI
-        mysql_uri = st.text_input("Enter your MySQL connection URI", 
+        mysql_uri = st.text_input("Enter your MySQL connection URI",
                                   value='mysql+mysqlconnector://root:Kaka1234!!@localhost:3306/chinook')
-        
+
         # Input for the user's database query
-        user_question = st.text_input("Ask a question about the database", 
-                                      value="how many albums are there in the database?")
-        
+        user_question = st.text_input("Ask a question about the database",
+                                      value="How many albums are there in the database?")
+
         # Button to process the query
         if st.button("Run Agent"):
             with st.spinner("Running agent..."):
-                sql_query, sql_response, final_answer = database_agent(mysql_uri, user_question)
-                
+                sql_query, sql_response, final_answer = database_agent(
+                    mysql_uri, user_question, st.session_state.db_chat_history)
+
+                # Update the chat history
+                st.session_state.db_chat_history.append(f"User: {user_question}")
+                st.session_state.db_chat_history.append(f"Assistant: {final_answer}")
+
                 # Display results
                 st.write("Generated SQL Query:")
                 st.code(sql_query)
-                
+
                 st.write("SQL Response:")
                 st.code(sql_response)
-                
+
                 st.write("Final Answer:")
                 st.success(final_answer)
+
+                # Optionally display the conversation history
+                st.write("Conversation History:")
+                for chat in st.session_state.db_chat_history:
+                    st.write(chat)
 
     elif agent_choice == "PDF Agent":
         st.subheader("PDF Agent")
