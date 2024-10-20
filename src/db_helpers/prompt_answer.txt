@@ -1,4 +1,7 @@
-Given the user's question, the SQL query, and the SQL response, provide a concise natural language answer.
+Given the following conversation, the user's question, the SQL query, and the SQL response, provide a concise natural language answer.
+
+Conversation History:
+{chat_history}
 
 Question: {question}
 

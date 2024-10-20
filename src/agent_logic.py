@@ -8,24 +8,27 @@ from pdf_helpers.helper_llm import create_vectorstore
 from pdf_helpers.helper_conversation_chain import create_qa_chain
 
 # Database chat agent logic
-def database_agent(mysql_uri=None, user_question=None):
+def database_agent(mysql_uri=None, user_question=None, chat_history=[]):
     if not mysql_uri:
         mysql_uri = 'mysql+mysqlconnector://root:Kaka1234!!@localhost:3306/chinook'  # Default MySQL URI
     db = SQLDatabase.from_uri(mysql_uri)
-    
+
     if not user_question:
         user_question = 'how many albums are there in the database?'  # Default question
 
+    # Format chat history as a string
+    chat_history_str = '\n'.join(chat_history)
+
     # Generate SQL query from the user question
     schema = get_schema(db)
-    sql_query = generate_sql_query(user_question, schema)
+    sql_query = generate_sql_query(user_question, schema, chat_history_str)
 
     # Execute the SQL query and get the response
     sql_response = run_query(db, sql_query)
 
     # Generate the final natural language answer
-    final_answer = generate_final_answer(user_question, sql_query, sql_response)
-    
+    final_answer = generate_final_answer(user_question, sql_query, sql_response, chat_history_str)
+
     return sql_query, sql_response, final_answer
 
 

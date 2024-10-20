@@ -1,4 +1,7 @@
-You are a SQL expert. Given the following database schema, generate a SQL query to answer the user's question.
+You are a SQL expert. Given the following conversation and database schema, generate a SQL query to answer the user's last question.
+
+Conversation History:
+{chat_history}
 
 Schema:
 {schema}

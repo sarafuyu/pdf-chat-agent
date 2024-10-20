@@ -8,16 +8,16 @@ def read_file(relative_file_path):
     current_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(current_dir, relative_file_path)
     with open(file_path, 'r') as file:
-        file_content = file.read() 
+        file_content = file.read()
     return file_content
 
 # Create the prompt template for generating SQL queries
 template_sql = read_file('prompt_question.txt')
-prompt_sql = PromptTemplate(input_variables=["schema", "question"], template=template_sql)
+prompt_sql = PromptTemplate(input_variables=["chat_history", "schema", "question"], template=template_sql)
 
 # Function to generate SQL query from user's question
-def generate_sql_query(question, schema):
-    prompt = prompt_sql.format(schema=schema, question=question)
+def generate_sql_query(question, schema, chat_history):
+    prompt = prompt_sql.format(chat_history=chat_history, schema=schema, question=question)
     response = chat_model.invoke(prompt)
     sql_query = response.strip()
 
@@ -41,14 +41,14 @@ def generate_sql_query(question, schema):
 # Create the prompt template for generating the final answer
 template_response = read_file('prompt_answer.txt')
 prompt_response = PromptTemplate(
-    input_variables=["question", "query", "response"],
+    input_variables=["chat_history", "question", "query", "response"],
     template=template_response
 )
 
 # Function to generate the final natural language answer
-def generate_final_answer(question, query, response):
+def generate_final_answer(question, query, response, chat_history):
     prompt = prompt_response.format(
-        question=question, query=query, response=response)
+        chat_history=chat_history, question=question, query=query, response=response)
     final_response = chat_model.invoke(prompt)
     answer = final_response.strip()
     return answer
