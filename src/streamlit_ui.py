@@ -35,10 +35,16 @@ def main():
         # Button to process the query
         if st.button("Run Agent"):
             with st.spinner("Running agent..."):
-                sql_query, sql_response, final_answer = database_agent(
-                    mysql_uri, user_question, st.session_state.db_chat_history)
+                # Build the conversation history
+                chat_history = st.session_state.db_chat_history.copy()
+                # Append the current user question
+                chat_history.append(f"User: {user_question}")
 
-                # Update the chat history
+                # Pass the conversation history to the agent
+                sql_query, sql_response, final_answer = database_agent(
+                    mysql_uri, user_question, chat_history)
+
+                # Update chat history with assistant's answer
                 st.session_state.db_chat_history.append(f"User: {user_question}")
                 st.session_state.db_chat_history.append(f"Assistant: {final_answer}")
 
@@ -52,7 +58,7 @@ def main():
                 st.write("Final Answer:")
                 st.success(final_answer)
 
-                # Optionally display the conversation history
+                # Display conversation history
                 st.write("Conversation History:")
                 for chat in st.session_state.db_chat_history:
                     st.write(chat)

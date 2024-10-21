@@ -1,11 +1,18 @@
-You are a SQL expert. Given the following conversation and database schema, generate a SQL query to answer the user's last question.
+You are a SQL expert assistant.
+
+Given the conversation history and the database schema, generate a SQL query to answer the user's latest question.
+
+Use the conversation history to understand the context of the user's question.
+
+Provide only the SQL query, without any additional text or explanations, enclosed in <SQL_QUERY></SQL_QUERY> tags.
 
 Conversation History:
 {chat_history}
 
-Schema:
+Database Schema:
 {schema}
 
-Question: {question}
+Latest Question:
+{question}
 
-Please provide only the SQL query, without any additional text or explanations.
+Provide only the SQL query enclosed in <SQL_QUERY></SQL_QUERY> tags.

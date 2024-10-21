@@ -1,0 +1,8 @@
+How many sngs are there?
+
+How manny albums are there?
+Which of them has the most songs?
+What genres does it have?
+
+How many artists are there?
+How many songs have they produced on average?

@@ -19,18 +19,20 @@ prompt_sql = PromptTemplate(input_variables=["chat_history", "schema", "question
 def generate_sql_query(question, schema, chat_history):
     prompt = prompt_sql.format(chat_history=chat_history, schema=schema, question=question)
     response = chat_model.invoke(prompt)
-    sql_query = response.strip()
 
-    # Regular expression pattern to match code blocks
-    pattern = r"```(?:sql)?\s*(.*?)\s*```"
-
-    # Search for the pattern in the response
-    match = re.search(pattern, sql_query, re.DOTALL | re.IGNORECASE)
+    # Extract the SQL query between <SQL_QUERY> and </SQL_QUERY>
+    pattern = r'<SQL_QUERY>\s*(.*?)\s*</SQL_QUERY>'
+    match = re.search(pattern, response, re.DOTALL)
     if match:
         sql_query = match.group(1).strip()
     else:
-        # If no code block, remove leading/trailing backticks and whitespace
-        sql_query = sql_query.strip('`').strip()
+        # If tags are missing, extract code blocks or return the response as is
+        pattern_code = r"```(?:sql)?\s*(.*?)\s*```"
+        match_code = re.search(pattern_code, response, re.DOTALL | re.IGNORECASE)
+        if match_code:
+            sql_query = match_code.group(1).strip()
+        else:
+            sql_query = response.strip()
 
     # Ensure the SQL query ends with a semicolon
     if not sql_query.endswith(';'):
@@ -41,14 +43,22 @@ def generate_sql_query(question, schema, chat_history):
 # Create the prompt template for generating the final answer
 template_response = read_file('prompt_answer.txt')
 prompt_response = PromptTemplate(
-    input_variables=["chat_history", "question", "query", "response"],
+    input_variables=["chat_history", "question", "response"],
     template=template_response
 )
 
 # Function to generate the final natural language answer
-def generate_final_answer(question, query, response, chat_history):
+def generate_final_answer(question, response, chat_history):
     prompt = prompt_response.format(
-        chat_history=chat_history, question=question, query=query, response=response)
+        chat_history=chat_history, question=question, response=response)
     final_response = chat_model.invoke(prompt)
-    answer = final_response.strip()
+
+    # Extract the answer between <ANSWER> and </ANSWER>
+    pattern = r'<ANSWER>\s*(.*?)\s*</ANSWER>'
+    match = re.search(pattern, final_response, re.DOTALL)
+    if match:
+        answer = match.group(1).strip()
+    else:
+        # If tags are missing, return the entire response
+        answer = final_response.strip()
     return answer

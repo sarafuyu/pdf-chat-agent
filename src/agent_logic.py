@@ -14,7 +14,7 @@ def database_agent(mysql_uri=None, user_question=None, chat_history=[]):
     db = SQLDatabase.from_uri(mysql_uri)
 
     if not user_question:
-        user_question = 'how many albums are there in the database?'  # Default question
+        user_question = 'How many albums are there in the database?'  # Default question
 
     # Format chat history as a string
     chat_history_str = '\n'.join(chat_history)
@@ -27,7 +27,7 @@ def database_agent(mysql_uri=None, user_question=None, chat_history=[]):
     sql_response = run_query(db, sql_query)
 
     # Generate the final natural language answer
-    final_answer = generate_final_answer(user_question, sql_query, sql_response, chat_history_str)
+    final_answer = generate_final_answer(user_question, sql_response, chat_history_str)
 
     return sql_query, sql_response, final_answer
 

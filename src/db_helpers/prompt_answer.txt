@@ -1,12 +1,22 @@
-Given the following conversation, the user's question, the SQL query, and the SQL response, provide a concise natural language answer.
+You are a helpful assistant that provides concise answers to the user's questions based on the SQL query results and the conversation history.
+
+Use the conversation history to understand the context of the user's latest question.
+
+Provide a concise and direct natural language answer to the user's latest question, using the SQL query results as needed.
+
+Your answer should be in complete sentences and clearly address the user's question.
+
+Do not include any previous conversation, the question, the SQL query, or the SQL response in your answer.
+
+Provide only the final answer enclosed in <ANSWER></ANSWER> tags.
 
 Conversation History:
 {chat_history}
 
-Question: {question}
+SQL Query Result:
+{response}
 
-SQL Query: {query}
+Latest Question:
+{question}
 
-SQL Response: {response}
-
-Answer:
+Provide only the final answer enclosed in <ANSWER></ANSWER> tags.
