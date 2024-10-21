@@ -6,6 +6,7 @@ from langchain_community.utilities import SQLDatabase
 from pdf_helpers.helper_pdf_processing import load_and_process_pdf
 from pdf_helpers.helper_llm import create_vectorstore
 from pdf_helpers.helper_conversation_chain import create_qa_chain
+import re
 
 # Database chat agent logic
 def database_agent(mysql_uri=None, user_question=None, chat_history=[]):
@@ -33,24 +34,30 @@ def database_agent(mysql_uri=None, user_question=None, chat_history=[]):
 
 
 # PDF chat agent logic
-def pdf_agent(file_path=None, user_question=None):
-    if not file_path:
-        file_path = "C:/Users/esaydrr/OneDrive - Ericsson/Desktop/dna-projects/pdf-chat-agent/src/data/pdfs/Animal_facts.pdf"  # Default PDF
-
-    # Load and process the PDF
-    docs = load_and_process_pdf(file_path)
-    
-    # Create the vector store and retriever
-    retriever = create_vectorstore(docs)
-    
+def pdf_agent(retriever, user_question, chat_history=[]):
     # Create the conversational chain
     qa_chain = create_qa_chain(retriever)
-    
-    if not user_question:
-        user_question = "What is the length of the giraffe's tongue?"  # Default question
 
-    # Process the query
-    response = qa_chain.invoke({"question": user_question, "chat_history": []})
+    # Format chat history as a list of tuples (user, assistant)
+    formatted_chat_history = []
+    for i in range(0, len(chat_history), 2):
+        user_msg = chat_history[i].replace("User: ", "")
+        assistant_msg = chat_history[i+1].replace("Assistant: ", "") if i+1 < len(chat_history) else ""
+        formatted_chat_history.append((user_msg, assistant_msg))
+
+    # Process the query using invoke()
+    response = qa_chain.invoke({"question": user_question, "chat_history": formatted_chat_history})
+
     answer = response.get('answer', 'No answer generated.')
-    
-    return answer, response.get("source_documents", [])
+    source_documents = response.get('source_documents', [])
+
+    # Extract the answer between <ANSWER></ANSWER>
+    pattern = r'<ANSWER>\s*(.*?)\s*</ANSWER>'
+    match = re.search(pattern, answer, re.DOTALL)
+    if match:
+        answer = match.group(1).strip()
+    else:
+        # If tags are missing, return the entire answer
+        answer = answer.strip()
+
+    return answer, source_documents

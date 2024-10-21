@@ -1,22 +1,20 @@
 import streamlit as st
 from agent_logic import database_agent, pdf_agent
-
-from langchain_community.document_loaders import PyPDFLoader  # Import PyPDFLoader for loading PDFs
-from langchain_community.embeddings import HuggingFaceEmbeddings  # Corrected import for embeddings
-from langchain_community.vectorstores import FAISS  # Ensure using community version
-from langchain.text_splitter import CharacterTextSplitter  # Import text splitter for chunking text
-from langchain.chains import ConversationalRetrievalChain  # For conversational queries
-from langchain.memory import ConversationBufferMemory  # To keep track of the chat history
-from langchain_huggingface import HuggingFaceEndpoint  # Keep this import as is
+from pdf_helpers.helper_pdf_processing import load_and_process_pdf
+from pdf_helpers.helper_llm import create_vectorstore
 
 
 def main():
     st.set_page_config(page_title="Database & PDF Chat Agents", page_icon=":books:")
     st.header("Chat with Database or PDF")
 
-    # Initialize conversation history
+    # Initialize conversation histories and retriever in session state
     if "db_chat_history" not in st.session_state:
         st.session_state.db_chat_history = []
+    if "pdf_chat_history" not in st.session_state:
+        st.session_state.pdf_chat_history = []
+    if "pdf_retriever" not in st.session_state:
+        st.session_state.pdf_retriever = None
 
     # Selection for either the database agent or the PDF agent
     agent_choice = st.sidebar.radio("Select Agent", ("Database Agent", "PDF Agent"))
@@ -66,36 +64,69 @@ def main():
     elif agent_choice == "PDF Agent":
         st.subheader("PDF Agent")
 
-        # File uploader for the PDF
-        uploaded_file = st.file_uploader("Upload a PDF file", type=["pdf"])
+        # File uploader for the PDFs (allows multiple files)
+        uploaded_files = st.file_uploader("Upload PDF files", type=["pdf"], accept_multiple_files=True)
 
-        if uploaded_file:
-            st.success("PDF uploaded successfully!")
-            with st.spinner("Processing PDF..."):
-                # Save the uploaded PDF to a temporary file
-                with open("data/pdfs/temp_pdf.pdf", "wb") as f:
-                    f.write(uploaded_file.getbuffer())
+        if uploaded_files:
+            st.success(f"{len(uploaded_files)} PDF(s) uploaded successfully!")
 
-                # User input for the question
-                user_question = st.text_input("Ask a question about the PDF", 
-                                              value="What is the length of the giraffe's tongue?")
-                
-                # Call the PDF agent with the uploaded PDF
-                if st.button("Run Agent"):
-                    with st.spinner("Generating answer..."):
-                        answer, source_documents = pdf_agent("data/pdfs/temp_pdf.pdf", user_question)
+            # Button to process the files
+            if st.button("Process Files"):
+                with st.spinner("Processing PDFs..."):
+                    # Save the uploaded PDFs to temporary files
+                    file_paths = []
+                    for i, uploaded_file in enumerate(uploaded_files):
+                        file_path = f"data/pdfs/temp_pdf_{i}.pdf"
+                        with open(file_path, "wb") as f:
+                            f.write(uploaded_file.getbuffer())
+                        file_paths.append(file_path)
 
-                        st.write("Answer:")
-                        st.success(answer)
+                    # Load and process the PDFs
+                    docs = []
+                    for file_path in file_paths:
+                        docs.extend(load_and_process_pdf(file_path))
 
-                        # Show sources if available
-                        if source_documents:
-                            st.write("Answer Source")
-                            top_source = source_documents[0]
-                            # st.write(f"Source: {top_source.metadata['source']}")
-                            st.write(top_source.page_content)
+                    # Create the vector store and retriever
+                    st.session_state.pdf_retriever = create_vectorstore(docs)
+
+                    st.success("PDFs processed successfully! You can now ask questions.")
+
         else:
-            st.warning("Please upload a PDF file to proceed.")
+            st.warning("Please upload PDF files to proceed.")
+
+        # If the retriever is available, display the question input and run agent
+        if st.session_state.pdf_retriever is not None:
+            user_question = st.text_input("Ask a question about the PDFs")
+
+            if st.button("Run Agent"):
+                with st.spinner("Generating answer..."):
+                    # Build the conversation history
+                    chat_history = st.session_state.pdf_chat_history.copy()
+                    chat_history.append(f"User: {user_question}")
+
+                    # Call the PDF agent with the retriever and chat history
+                    answer, source_documents = pdf_agent(
+                        st.session_state.pdf_retriever, user_question, chat_history)
+
+                    # Update chat history with assistant's answer
+                    st.session_state.pdf_chat_history.append(f"User: {user_question}")
+                    st.session_state.pdf_chat_history.append(f"Assistant: {answer}")
+
+                    st.write("Answer:")
+                    st.success(answer)
+
+                    # Show source document content
+                    if source_documents:
+                        st.write("Source Document:")
+                        top_source = source_documents[0]
+                        st.write(top_source.page_content)
+
+                    # Display conversation history
+                    st.write("Conversation History:")
+                    for chat in st.session_state.pdf_chat_history:
+                        st.write(chat)
+    else:
+        st.warning("Please upload PDF files to proceed.")
 
 if __name__ == '__main__':
     main()

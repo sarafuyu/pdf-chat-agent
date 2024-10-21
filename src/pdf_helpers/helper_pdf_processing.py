@@ -4,12 +4,12 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 def load_and_process_pdf(file):
 
-    # Load documents
+    # Load documents from the PDF file
     loader = PyPDFLoader(file)
     documents = loader.load()
 
-    # Split documents
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=250, chunk_overlap=0)
+    # Split documents into manageable chunks
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
     docs = text_splitter.split_documents(documents)
 
     return docs

@@ -1,4 +1,4 @@
-How many sngs are there?
+How many songs are there?
 
 How manny albums are there?
 Which of them has the most songs?
@@ -6,3 +6,8 @@ What genres does it have?
 
 How many artists are there?
 How many songs have they produced on average?
+
+How long is the tongue of a giraffe?
+What color is it?
+
+What is said about the hours for flexible work?
