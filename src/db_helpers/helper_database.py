@@ -7,4 +7,9 @@ def get_schema(db):
 
 # Function to run the SQL query against the database
 def run_query(db, query):
-    return db.run(query)
+    try:
+        result = db.run(query)
+        return result
+    except Exception as e:
+        # Handle exceptions and re-raise them to be caught in the calling function
+        raise Exception(f"Error executing SQL query: {str(e)}")

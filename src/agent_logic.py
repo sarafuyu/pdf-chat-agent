@@ -2,6 +2,7 @@ from db_helpers.helper_llm import chat_model
 from db_helpers.helper_database import get_schema, run_query
 from db_helpers.helper_prompt import generate_sql_query, generate_final_answer
 from langchain_community.utilities import SQLDatabase
+import traceback
 
 from pdf_helpers.helper_pdf_processing import load_and_process_pdf
 from pdf_helpers.helper_llm import create_vectorstore
@@ -20,17 +21,28 @@ def database_agent(mysql_uri=None, user_question=None, chat_history=[]):
     # Format chat history as a string
     chat_history_str = '\n'.join(chat_history)
 
-    # Generate SQL query from the user question
-    schema = get_schema(db)
-    sql_query = generate_sql_query(user_question, schema, chat_history_str)
+    try:
+        # Generate SQL query from the user question
+        schema = get_schema(db)
+        sql_query = generate_sql_query(user_question, schema, chat_history_str)
 
-    # Execute the SQL query and get the response
-    sql_response = run_query(db, sql_query)
+        # Execute the SQL query and get the response
+        sql_response = run_query(db, sql_query)
 
-    # Generate the final natural language answer
-    final_answer = generate_final_answer(user_question, sql_response, chat_history_str)
+        # Check if the SQL response is empty
+        if not sql_response:
+            final_answer = "I'm sorry, I couldn't find any results for your query."
+        else:
+            # Generate the final natural language answer
+            final_answer = generate_final_answer(user_question, sql_response, chat_history_str)
 
-    return sql_query, sql_response, final_answer
+        return sql_query, sql_response, final_answer
+
+    except Exception as e:
+        # Handle exceptions and return an error message
+        error_message = f"An error occurred: {str(e)}"
+        print(traceback.format_exc())  # Optionally log the traceback
+        return None, None, error_message
 
 
 # PDF chat agent logic
