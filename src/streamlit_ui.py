@@ -69,21 +69,23 @@ def main():
         uploaded_files = st.file_uploader("Upload PDF files", type=["pdf"], accept_multiple_files=True)
 
         if uploaded_files:
-            st.success(f"{len(uploaded_files)} PDF(s) uploaded successfully!")
+            st.success(f"{len(uploaded_files)} PDF(s) were uploaded successfully!")
 
             # Button to process the files
             if st.button("Process Files"):
                 with st.spinner("Processing PDFs..."):
-                    # Create the vector store and retriever
+                    # Create the vector store and database retriever
                     st.session_state.pdf_retriever = create_vectorstore(uploaded_files)
 
-                    st.success("PDFs processed successfully! You can now ask questions.")
+                    st.success("PDF(s) processed successfully! You can now ask questions about the content.")
 
         else:
-            st.warning("Please upload PDF files to proceed.")
+            st.warning("Please upload PDF file(s) to proceed.")
 
         # If the retriever is available, display the question input and run agent
         if st.session_state.pdf_retriever is not None:
+
+            # User question field for pfd questions
             user_question = st.text_input("Ask a question about the PDFs", 
                                           value="How long is the tongue of a giraffe?")
 
@@ -91,6 +93,7 @@ def main():
                 with st.spinner("Generating answer..."):
                     # Build the conversation history
                     chat_history = st.session_state.pdf_chat_history.copy()
+                    # Append the current user question
                     chat_history.append(f"User: {user_question}")
 
                     # Call the PDF agent with the retriever and chat history
@@ -101,6 +104,7 @@ def main():
                     st.session_state.pdf_chat_history.append(f"User: {user_question}")
                     st.session_state.pdf_chat_history.append(f"Assistant: {answer}")
 
+                    # Display results
                     st.write("Answer:")
                     st.success(answer)
 
