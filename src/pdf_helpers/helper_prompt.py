@@ -1,24 +1,14 @@
-def conversation_loop(qa_chain):
-    chat_history = []
+import os
+from langchain.prompts.prompt import PromptTemplate
 
-    while True:
-        query = input("You: ")
-        if query.lower() == "exit":
-            print("Exiting the chat.")
-            break
+# Function to read a text file and store it in a string
+def read_file(relative_file_path):
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(current_dir, relative_file_path)
+    with open(file_path, 'r') as file:
+        file_content = file.read()
+    return file_content
 
-        # Process the query with the conversation chain using invoke
-        result = qa_chain.invoke({"question": query, "chat_history": chat_history})
-        chat_history.extend([(query, result["answer"])])
-
-        # Display the concise chatbot's response
-        print(f"\nYour question: {query}")
-        print(f"Agent answer: {result['answer']}")
-
-        # Show only the highest-ranking source
-        if result["source_documents"]:
-            top_source = result["source_documents"][0]
-            print(f"Source: {top_source.metadata['source']}\n{top_source.page_content}\n")
-
-def clear_history():
-    return []
+# Define a custom prompt template with explicit instructions
+prompt_template = read_file('prompt_question.txt')
+prompt_question = PromptTemplate(template=prompt_template, input_variables=["context", "question", "chat_history"])

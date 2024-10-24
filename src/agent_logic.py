@@ -1,11 +1,11 @@
-from db_helpers.helper_llm import chat_model
+#from db_helpers.helper_llm import chat_model
 from db_helpers.helper_database import get_schema, run_query
 from db_helpers.helper_prompt import generate_sql_query, generate_final_answer
 from langchain_community.utilities import SQLDatabase
 import traceback
 
-from pdf_helpers.helper_pdf_processing import load_and_process_pdf
-from pdf_helpers.helper_vsdb import create_vectorstore
+# from pdf_helpers.helper_pdf_processing import load_and_process_pdf
+# from pdf_helpers.helper_vsdb import create_vectorstore
 from pdf_helpers.helper_conversation_chain import create_qa_chain
 import re
 
@@ -57,7 +57,7 @@ def pdf_agent(retriever, user_question, chat_history=[]):
         assistant_msg = chat_history[i+1].replace("Assistant: ", "") if i+1 < len(chat_history) else ""
         formatted_chat_history.append((user_msg, assistant_msg))
 
-    # Process the query using invoke()
+    # Process the query 
     response = qa_chain.invoke({"question": user_question, "chat_history": formatted_chat_history})
 
     answer = response.get('answer', 'No answer generated.')

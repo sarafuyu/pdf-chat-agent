@@ -1,6 +1,7 @@
 import streamlit as st
 from agent_logic import database_agent, pdf_agent
-from pdf_helpers.helper_pdf_processing import load_and_process_pdf
+#from pdf_helpers.helper_pdf_processing import load_and_process_pdf
+#from pdf_helpers.helper_pdf_processing import save_pdfs
 from pdf_helpers.helper_vsdb import create_vectorstore
 
 
@@ -73,21 +74,8 @@ def main():
             # Button to process the files
             if st.button("Process Files"):
                 with st.spinner("Processing PDFs..."):
-                    # Save the uploaded PDFs to temporary files
-                    file_paths = []
-                    for i, uploaded_file in enumerate(uploaded_files):
-                        file_path = f"data/pdfs/temp_pdf_{i}.pdf"
-                        with open(file_path, "wb") as f:
-                            f.write(uploaded_file.getbuffer())
-                        file_paths.append(file_path)
-
-                    # Load and process the PDFs
-                    docs = []
-                    for file_path in file_paths:
-                        docs.extend(load_and_process_pdf(file_path))
-
                     # Create the vector store and retriever
-                    st.session_state.pdf_retriever = create_vectorstore(docs)
+                    st.session_state.pdf_retriever = create_vectorstore(uploaded_files)
 
                     st.success("PDFs processed successfully! You can now ask questions.")
 
@@ -96,7 +84,8 @@ def main():
 
         # If the retriever is available, display the question input and run agent
         if st.session_state.pdf_retriever is not None:
-            user_question = st.text_input("Ask a question about the PDFs")
+            user_question = st.text_input("Ask a question about the PDFs", 
+                                          value="How long is the tongue of a giraffe?")
 
             if st.button("Run Agent"):
                 with st.spinner("Generating answer..."):

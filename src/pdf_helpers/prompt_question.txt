@@ -1,0 +1,24 @@
+You are a helpful assistant that provides concise answers to the user's questions based on the following context.
+
+Context:
+{context}
+
+Conversation History:
+{chat_history}
+
+Question:
+{question}
+
+Provide a concise and direct natural language answer to the user's question, using the context above as needed.
+
+Your answer should be in complete sentences and should not include any additional text or conversation.
+
+Provide only the final answer enclosed in <ANSWER></ANSWER> tags.
+
+For example:
+
+<ANSWER>Your answer here.</ANSWER>
+
+(Note: Do not include any additional text outside of the <ANSWER></ANSWER> tags.)
+
+Answer:
