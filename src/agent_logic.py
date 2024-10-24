@@ -5,7 +5,7 @@ from langchain_community.utilities import SQLDatabase
 import traceback
 
 from pdf_helpers.helper_pdf_processing import load_and_process_pdf
-from pdf_helpers.helper_llm import create_vectorstore
+from pdf_helpers.helper_vsdb import create_vectorstore
 from pdf_helpers.helper_conversation_chain import create_qa_chain
 import re
 

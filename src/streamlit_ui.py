@@ -1,7 +1,7 @@
 import streamlit as st
 from agent_logic import database_agent, pdf_agent
 from pdf_helpers.helper_pdf_processing import load_and_process_pdf
-from pdf_helpers.helper_llm import create_vectorstore
+from pdf_helpers.helper_vsdb import create_vectorstore
 
 
 def main():
