@@ -173,7 +173,7 @@ chat-agent/
 │   │   └── prompt_question.txt
 │   ├── agent_logic.py
 │   ├── example_questions.txt
-│   ├── streamlit_ui.py
+│   └── streamlit_ui.py
 ├── .gitignore
 ├── Databricks to Snowflake Conversion.docx
 ├── RAG Framework evaluation.docx
