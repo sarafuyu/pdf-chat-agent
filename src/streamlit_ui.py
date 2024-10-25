@@ -2,7 +2,7 @@ import streamlit as st
 from agent_logic import database_agent, pdf_agent
 #from pdf_helpers.helper_pdf_processing import load_and_process_pdf
 #from pdf_helpers.helper_pdf_processing import save_pdfs
-from pdf_helpers.helper_vsdb import create_vectorstore
+from pdf_helpers.helper_vsdb import create_vectorstore, create_retriever
 
 
 def main():
@@ -75,7 +75,8 @@ def main():
             if st.button("Process Files"):
                 with st.spinner("Processing PDFs..."):
                     # Create the vector store and database retriever
-                    st.session_state.pdf_retriever = create_vectorstore(uploaded_files)
+                    st.session_state.pdf_db = create_vectorstore(uploaded_files)
+                    st.session_state.pdf_retriever = create_retriever(st.session_state.pdf_db)
 
                     st.success("PDF(s) processed successfully! You can now ask questions about the content.")
 

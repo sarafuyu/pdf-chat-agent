@@ -38,7 +38,11 @@ def create_vectorstore(uploaded_files):
     persist_directory = "./data/chroma" # Path to store the Chroma database
     db = Chroma.from_documents(documents=docs, embedding=embeddings, persist_directory=persist_directory)
 
+    return db
+
+def create_retriever(db):
+
     # Define retriever for similarity search
     retriever = db.as_retriever(search_type="similarity", search_kwargs={"k": 3})
-
+    
     return retriever
