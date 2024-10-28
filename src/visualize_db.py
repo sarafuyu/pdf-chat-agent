@@ -4,6 +4,7 @@ import logging
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
+
 from pdf_helpers.helper_vsdb import load_split_pdf
 from pdf_helpers.helper_llm import embeddings
 from langchain_chroma import Chroma
@@ -11,59 +12,83 @@ from langchain_chroma import Chroma
 # Configure logging to overwrite the log file each run
 logging.basicConfig(filename='output_log.txt', filemode='w', level=logging.INFO, format='%(message)s')
 
-# Specify the persist directory
-file_path = "data/pdfs/Animal_facts.pdf"
-persist_directory = "./data/chroma"
 
-# Function to handle errors during rmtree
 def remove_readonly(func, path, excinfo):
+    """Error handler for shutil.rmtree to remove read-only files."""
     import stat
     os.chmod(path, stat.S_IWRITE)
     func(path)
 
-# Remove existing data in the persist directory
-if os.path.exists(persist_directory):
-    try:
-        # Now, remove the directory
-        shutil.rmtree(persist_directory, onerror=remove_readonly)
-    except Exception as e:
-        print(f"Error removing persist directory: {e}")
 
-# Recreate the persist directory
-os.makedirs(persist_directory, exist_ok=True)
+def reset_vector_store_db(persist_directory):
+    """
+    Resets the vector store database by removing the persist directory and recreating it.
+    """
+    if os.path.exists(persist_directory):
+        try:
+            shutil.rmtree(persist_directory, onerror=remove_readonly)
+        except Exception as e:
+            print(f"Error removing persist directory: {e}")
+    os.makedirs(persist_directory, exist_ok=True)
 
-# Split the PDF document into chunks
-doc = load_split_pdf(file_path)
 
-# Prepare data for the vector store
-documents = []
-metadatas = []
-ids = []
+def create_db_content(file_path):
+    """
+    Loads and splits the PDF document into chunks and prepares data for the vector store.
+    Returns:
+        documents (list): List of document texts.
+        metadatas (list): List of metadata dictionaries for each document.
+        ids (list): List of unique IDs for each document.
+    """
+    doc = load_split_pdf(file_path)
 
-for idx, doc_chunk in enumerate(doc):
-    # Add a unique ID to each document's metadata
-    doc_chunk.metadata['chunk_id'] = idx
-    documents.append(doc_chunk.page_content)
-    metadatas.append(doc_chunk.metadata)
-    ids.append(str(idx))
+    documents = []
+    metadatas = []
+    ids = []
 
-# Create the Chroma vector store
-db = Chroma(
-    persist_directory=persist_directory,
-    embedding_function=embeddings,
-)
+    for idx, doc_chunk in enumerate(doc):
+        doc_chunk.metadata['chunk_id'] = idx
+        documents.append(doc_chunk.page_content)
+        metadatas.append(doc_chunk.metadata)
+        ids.append(str(idx))
 
-db.add_texts(texts=documents, metadatas=metadatas, ids=ids)
+    return documents, metadatas, ids
 
-# Define the combined inspection and visualization function
-def inspect_and_visualize_chroma(db):
-    # Get collection information
+def create_vector_store(db_directory, embedding_function, documents, metadatas, ids):
+    """
+    Creates a Chroma vector store and adds the provided texts.
+    Args:
+        db_directory (str): Directory to persist the database.
+        embedding_function (callable): Function to compute embeddings.
+        documents (list): List of document texts.
+        metadatas (list): List of metadata dictionaries.
+        ids (list): List of document IDs.
+    Returns:
+        db (Chroma): The created Chroma vector store database.
+    """
+    db = Chroma(
+        persist_directory=db_directory,
+        embedding_function=embedding_function,
+    )
+    db.add_texts(texts=documents, metadatas=metadatas, ids=ids)
+    return db
+
+
+def inspect_vector_store(db):
+    """
+    Retrieves data from the vector store database and returns embeddings array, documents, id_to_index mapping.
+    Args:
+        db (Chroma): The Chroma vector store database.
+    Returns:
+        embeddings_array (np.ndarray): Array of embeddings.
+        documents (list): List of document texts.
+        id_to_index (dict): Mapping from document IDs to their indices.
+    """
     collection = db._collection
     logging.info("Collection Name: %s", collection.name)
     logging.info("Number of Documents: %d", collection.count())
     logging.info("Collection Metadata: %s", collection.metadata)
 
-    # Retrieve embeddings, metadatas, documents, and ids
     results = collection.get(include=['embeddings', 'metadatas', 'documents'])
     embeddings_list = results['embeddings']
     metadatas = results['metadatas']
@@ -78,39 +103,38 @@ def inspect_and_visualize_chroma(db):
         logging.info(f"Document Content: {documents[idx]}")
         logging.info("-----\n")
 
-    # Build a mapping from ids to indices
     id_to_index = {ids[idx]: idx for idx in range(len(ids))}
-
-    # Convert embeddings to a NumPy array
     embeddings_array = np.array(embeddings_list)
-
-    # Visualize the embeddings without any query
-    visualize_embeddings_with_query(embeddings_array, documents)
 
     return embeddings_array, documents, id_to_index
 
-# Visualization function
+
 def visualize_embeddings_with_query(embeddings, documents, query_embedding=None, retrieved_indices=None):
-    # Reduce dimensions to 2D using PCA
+    """
+    Visualizes embeddings in 2D space using PCA.
+    Optionally includes a query embedding and highlights retrieved documents.
+    Args:
+        embeddings (np.ndarray): Array of document embeddings.
+        documents (list): List of document texts.
+        query_embedding (np.ndarray, optional): The query embedding.
+        retrieved_indices (list, optional): Indices of retrieved documents.
+    """
     pca = PCA(n_components=2)
     embeddings_2d = pca.fit_transform(embeddings)
 
     plt.figure(figsize=(12, 8))
 
-    # Plot all document embeddings
     plt.scatter(embeddings_2d[:, 0], embeddings_2d[:, 1], label='Documents', c='blue')
 
-    # Annotate document points
     for i, doc in enumerate(documents):
         plt.annotate(f'Doc {i}', (embeddings_2d[i, 0], embeddings_2d[i, 1]))
 
-    # Plot query embedding if provided
     if query_embedding is not None:
         query_embedding_2d = pca.transform(query_embedding)
-        plt.scatter(query_embedding_2d[0, 0], query_embedding_2d[0, 1], label='Query', c='red', marker='X', s=100)
+        plt.scatter(query_embedding_2d[0, 0], query_embedding_2d[0, 1],
+                    label='Query', c='red', marker='X', s=100)
         plt.annotate('Query', (query_embedding_2d[0, 0], query_embedding_2d[0, 1]))
 
-    # Highlight retrieved documents if provided
     if retrieved_indices:
         plt.scatter(embeddings_2d[retrieved_indices, 0], embeddings_2d[retrieved_indices, 1],
                     edgecolors='green', facecolors='none', s=200, linewidths=2, label='Retrieved Docs')
@@ -121,34 +145,68 @@ def visualize_embeddings_with_query(embeddings, documents, query_embedding=None,
     plt.legend()
     plt.show()
 
-# Call the combined inspection and visualization function
-embeddings_array, documents, id_to_index = inspect_and_visualize_chroma(db)
 
-# Create the retriever
 def create_retriever(db):
+    """
+    Creates a retriever from the database.
+    Args:
+        db (Chroma): The Chroma vector store database.
+    Returns:
+        retriever: The retriever object.
+    """
     retriever = db.as_retriever(search_type="similarity", search_kwargs={"k": 3})
     return retriever
 
-retriever = create_retriever(db)
 
-# Define a query
-query = "How long is a giraffe's tongue?"
+def main():
+    # Specify the persist directory and file path
+    file_path = "data/pdfs/Animal_facts.pdf"
+    persist_directory = "./data/chroma"
 
-# Compute the query embedding and convert to NumPy array
-query_embedding = embeddings.embed_query(query)
-query_embedding = np.array(query_embedding).reshape(1, -1)
+    # Reset the vector store database
+    reset_vector_store_db(persist_directory)
 
-# Use the retriever to get top-k documents
-retrieved_docs = retriever.invoke(query)
+    # Create database content from the PDF file
+    documents, metadatas, ids = create_db_content(file_path)
 
-# Get indices of retrieved documents in the embeddings array
-retrieved_indices = []
-for doc in retrieved_docs:
-    doc_id = doc.metadata.get('chunk_id')
-    if doc_id is not None:
-        index = id_to_index.get(str(doc_id))
-        if index is not None:
-            retrieved_indices.append(index)
+    # Create the vector store database and add the content
+    db = create_vector_store(persist_directory, embeddings, documents, metadatas, ids)
 
-# Visualize the embeddings with the query and retrieved documents
-visualize_embeddings_with_query(embeddings_array, documents, query_embedding=query_embedding, retrieved_indices=retrieved_indices)
+    # Inspect the database and get embeddings and mappings
+    embeddings_array, documents, id_to_index = inspect_vector_store(db)
+
+    # Visualize the embeddings without any query
+    visualize_embeddings_with_query(embeddings_array, documents)
+
+    # Create the retriever
+    retriever = create_retriever(db)
+
+    # Define a query
+    query = "How long is a giraffe's tongue?"
+
+    # Compute the query embedding and convert to NumPy array
+    query_embedding = embeddings.embed_query(query)
+    query_embedding = np.array(query_embedding).reshape(1, -1)
+
+    # Use the retriever to get top-k documents
+    retrieved_docs = retriever.invoke(query)
+
+    # Get indices of retrieved documents in the embeddings array
+    retrieved_indices = []
+    for doc in retrieved_docs:
+        doc_id = doc.metadata.get('chunk_id')
+        if doc_id is not None:
+            index = id_to_index.get(str(doc_id))
+            if index is not None:
+                retrieved_indices.append(index)
+
+    # Visualize the embeddings with the query and retrieved documents
+    visualize_embeddings_with_query(
+        embeddings_array, documents,
+        query_embedding=query_embedding,
+        retrieved_indices=retrieved_indices
+    )
+
+
+if __name__ == "__main__":
+    main()
