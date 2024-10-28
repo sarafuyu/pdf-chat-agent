@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 from pdf_helpers.helper_vsdb import load_split_pdf
 from pdf_helpers.helper_llm import embeddings
-from langchain_community.vectorstores import Chroma
+from langchain_chroma import Chroma
 
 # Configure logging to overwrite the log file each run
 logging.basicConfig(filename='output_log.txt', filemode='w', level=logging.INFO, format='%(message)s')
@@ -34,19 +34,6 @@ os.makedirs(persist_directory, exist_ok=True)
 
 # Split the PDF document into chunks
 doc = load_split_pdf(file_path)
-
-# Remove duplicate chunks
-def remove_duplicate_chunks(docs):
-    unique_docs = []
-    seen_contents = set()
-    for d in docs:
-        content = d.page_content.strip()
-        if content not in seen_contents:
-            seen_contents.add(content)
-            unique_docs.append(d)
-    return unique_docs
-
-doc = remove_duplicate_chunks(doc)
 
 # Prepare data for the vector store
 documents = []
