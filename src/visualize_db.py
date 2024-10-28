@@ -8,8 +8,8 @@ from pdf_helpers.helper_vsdb import load_split_pdf
 from pdf_helpers.helper_llm import embeddings
 from langchain_community.vectorstores import Chroma
 
-# Configure logging
-logging.basicConfig(filename='output_log.txt', level=logging.INFO, format='%(message)s')
+# Configure logging to overwrite the log file each run
+logging.basicConfig(filename='output_log.txt', filemode='w', level=logging.INFO, format='%(message)s')
 
 # Specify the persist directory
 file_path = "data/pdfs/Animal_facts.pdf"
@@ -24,11 +24,6 @@ def remove_readonly(func, path, excinfo):
 # Remove existing data in the persist directory
 if os.path.exists(persist_directory):
     try:
-        # Close any open connections to the Chroma database
-        db_temp = Chroma(persist_directory=persist_directory, embedding_function=embeddings)
-        db_temp._client.close()
-        del db_temp
-
         # Now, remove the directory
         shutil.rmtree(persist_directory, onerror=remove_readonly)
     except Exception as e:
@@ -93,7 +88,7 @@ def inspect_and_visualize_chroma(db):
         logging.info(f"Document ID: {ids[idx]}")
         logging.info(f"Embedding: {embeddings_list[idx][:5]}...")
         logging.info(f"Metadata: {metadatas[idx]}")
-        logging.info(f"Document Content: {documents[idx][:100]}...")
+        logging.info(f"Document Content: {documents[idx]}")
         logging.info("-----\n")
 
     # Build a mapping from ids to indices
@@ -157,7 +152,7 @@ query_embedding = embeddings.embed_query(query)
 query_embedding = np.array(query_embedding).reshape(1, -1)
 
 # Use the retriever to get top-k documents
-retrieved_docs = retriever.get_relevant_documents(query)
+retrieved_docs = retriever.invoke(query)
 
 # Get indices of retrieved documents in the embeddings array
 retrieved_indices = []
