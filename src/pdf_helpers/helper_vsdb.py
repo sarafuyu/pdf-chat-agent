@@ -10,7 +10,7 @@ def load_split_pdf(file_path):
     documents = loader.load()
 
     # Split documents into manageable chunks
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=0) # Old 500, 100
     docs = text_splitter.split_documents(documents)
 
     return docs
