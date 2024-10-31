@@ -1,6 +1,8 @@
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
+import os
+import shutil
 from langchain_community.vectorstores import Chroma
 from pdf_helpers.helper_llm import embeddings
 
@@ -29,6 +31,24 @@ def save_pdfs(uploaded_files):
     for file_path in file_paths:
         docs.extend(load_split_pdf(file_path))
     return docs
+
+def remove_readonly(func, path, excinfo):
+    """Error handler for shutil.rmtree to remove read-only files."""
+    import stat
+    os.chmod(path, stat.S_IWRITE)
+    func(path)
+
+
+def reset_vector_store_db(persist_directory="./data/chroma"):
+    """
+    Resets the vector store database by removing the persist directory and recreating it.
+    """
+    if os.path.exists(persist_directory):
+        try:
+            shutil.rmtree(persist_directory, onerror=remove_readonly)
+        except Exception as e:
+            print(f"Error removing persist directory: {e}")
+    os.makedirs(persist_directory, exist_ok=True)
 
 def create_vectorstore(uploaded_files):
     # Process uploaded files and split into appropriate chunks

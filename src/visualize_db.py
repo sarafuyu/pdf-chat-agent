@@ -5,32 +5,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 
-from pdf_helpers.helper_vsdb import load_split_pdf
+from pdf_helpers.helper_vsdb import load_split_pdf, reset_vector_store_db
 from pdf_helpers.helper_llm import embeddings
 from langchain_chroma import Chroma
 
 # Configure logging to overwrite the log file each run
-logging.basicConfig(filename='output_log.txt', filemode='w', level=logging.INFO, format='%(message)s')
-
-
-def remove_readonly(func, path, excinfo):
-    """Error handler for shutil.rmtree to remove read-only files."""
-    import stat
-    os.chmod(path, stat.S_IWRITE)
-    func(path)
-
-
-def reset_vector_store_db(persist_directory):
-    """
-    Resets the vector store database by removing the persist directory and recreating it.
-    """
-    if os.path.exists(persist_directory):
-        try:
-            shutil.rmtree(persist_directory, onerror=remove_readonly)
-        except Exception as e:
-            print(f"Error removing persist directory: {e}")
-    os.makedirs(persist_directory, exist_ok=True)
-
+logging.basicConfig(filename='visualization_log.txt', filemode='w', level=logging.INFO, format='%(message)s')
 
 def create_db_content(file_path):
     """
