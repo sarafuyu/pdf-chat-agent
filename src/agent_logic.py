@@ -1,13 +1,10 @@
-#from db_helpers.helper_llm import chat_model
 from db_helpers.helper_database import get_schema, run_query
 from db_helpers.helper_prompt import generate_sql_query, generate_final_answer
 from langchain_community.utilities import SQLDatabase
 import traceback
-
-# from pdf_helpers.helper_pdf_processing import load_and_process_pdf
-# from pdf_helpers.helper_vsdb import create_vectorstore
 from pdf_helpers.helper_conversation_chain import create_qa_chain
 import re
+import streamlit as st
 
 # Database chat agent logic
 def database_agent(mysql_uri=None, user_question=None, chat_history=[]):
@@ -74,3 +71,8 @@ def pdf_agent(retriever, user_question, chat_history=[]):
         answer = answer.strip()
 
     return answer, top_source
+
+# Load custom CSS
+def load_css(file_name):
+    with open(file_name) as f:
+        st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
