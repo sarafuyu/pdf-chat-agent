@@ -62,6 +62,7 @@ def pdf_agent(retriever, user_question, chat_history=[]):
 
     answer = response.get('answer', 'No answer generated.')
     source_documents = response.get('source_documents', [])
+    top_source = source_documents[0].page_content
 
     # Extract the answer between <ANSWER></ANSWER>
     pattern = r'<ANSWER>\s*(.*?)\s*</ANSWER>'
@@ -72,4 +73,4 @@ def pdf_agent(retriever, user_question, chat_history=[]):
         # If tags are missing, return the entire answer
         answer = answer.strip()
 
-    return answer, source_documents
+    return answer, top_source
