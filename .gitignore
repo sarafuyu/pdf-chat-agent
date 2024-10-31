@@ -64,9 +64,6 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 
-# File stuff:
-src/temp_pdf.pdf
-
 # Flask stuff:
 instance/
 .webassets-cache
