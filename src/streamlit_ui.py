@@ -1,13 +1,14 @@
 import streamlit as st
-from agent_logic import database_agent, pdf_agent
-#from pdf_helpers.helper_pdf_processing import load_and_process_pdf
-#from pdf_helpers.helper_pdf_processing import save_pdfs
+from agent_logic import database_agent, pdf_agent, load_css
 from pdf_helpers.helper_vsdb import reset_vector_store_db, create_vectorstore, create_retriever
-
+from ui_helpers.helper_chat_history import display_chat_history
+import os
 
 def main():
     st.set_page_config(page_title="Database & PDF Chat Agents", page_icon=":books:")
     st.header("Chat with Database or PDF")
+
+    load_css("ui_helpers/style.css")
 
     # Initialize conversation histories and retriever in session state
     if "db_chat_history" not in st.session_state:
@@ -51,19 +52,19 @@ def main():
                     st.session_state.db_chat_history.append(f"Assistant: {final_answer}")
 
                     # Display results
-                    st.write("Generated SQL Query:")
+                    st.write("##### Generated SQL Query:")
                     st.code(sql_query)
 
-                    st.write("SQL Response:")
+                    st.write("##### SQL Response:")
                     st.code(sql_response)
 
-                    st.write("Answer:")
+                    st.write("##### Answer:")
                     st.success(final_answer)
 
-                    # Display conversation history
-                    st.write("Conversation History:")
-                    for chat in st.session_state.db_chat_history:
-                        st.write(chat)
+        # Display conversation history only if there are messages
+        if st.session_state.db_chat_history:
+            st.write("##### Conversation History:")
+            display_chat_history(st.session_state.db_chat_history)
 
     elif agent_choice == "PDF Agent":
         st.subheader("PDF Agent")
@@ -79,10 +80,10 @@ def main():
                     st.session_state.pdf_db = create_vectorstore(uploaded_files)
                     st.session_state.pdf_retriever = create_retriever(st.session_state.pdf_db)
 
-        # User question field for pfd questions
-        user_question = st.text_input("Ask a question about the PDF(s)", 
-                                    value="How long is the tongue of a giraffe?")
-        
+        # User question field for PDF questions
+        user_question = st.text_input("Ask a question about the PDF(s)",
+                                      value="How long is the tongue of a giraffe?")
+
         # If the retriever is available, display the question input and run agent
         if st.session_state.pdf_retriever and user_question:
             if st.button("Run Agent"):
@@ -101,20 +102,21 @@ def main():
                     st.session_state.pdf_chat_history.append(f"Assistant: {answer}")
 
                     # Show source document content
-                    
-                    st.write("Source Document:")
-                    st.write(source_document)
+                    st.write("##### Source Document:")
+                    st.markdown(f'''
+                        <div class="source-document">
+                            {source_document}
+                        </div>
+                    ''', unsafe_allow_html=True)
 
                     # Display results
-                    st.write("Answer:")
+                    st.write("##### Answer:")
                     st.success(answer)
 
-                    # Display conversation history
-                    st.write("Conversation History:")
-                    for chat in st.session_state.pdf_chat_history:
-                        st.write(chat)
-    else:
-        st.warning("Please upload PDF files to proceed.")
+        # Display conversation history only if there are messages
+        if st.session_state.pdf_chat_history:
+            st.write("##### Conversation History:")
+            display_chat_history(st.session_state.pdf_chat_history)
 
 if __name__ == '__main__':
     main()

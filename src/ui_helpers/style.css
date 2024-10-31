@@ -1,0 +1,35 @@
+/* Chat History Styles */
+
+.chat-message.user {
+    text-align: right;
+}
+
+.chat-message.user p {
+    background-color: #dcf8c6;
+    display: inline-block;
+    padding: 10px;
+    border-radius: 10px;
+    color: #000;
+}
+
+.chat-message.assistant {
+    text-align: left;
+}
+
+.chat-message.assistant p {
+    background-color: #ececec;
+    display: inline-block;
+    padding: 10px;
+    border-radius: 10px;
+    color: #000;
+}
+
+/* Source Document Styles */
+.source-document {
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
