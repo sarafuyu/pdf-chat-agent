@@ -4,6 +4,10 @@ from pdf_helpers.helper_vsdb import reset_vector_store_db, create_vectorstore, c
 from ui_helpers.helper_chat_history import display_chat_history
 import os
 
+# Constants konfiguration
+MYSQL_PASSWORD = "Kaka1234!!"
+DB_NAME = "chinook"
+
 def main():
     st.set_page_config(page_title="Database & PDF Chat Agents", page_icon=":books:")
     st.header("Chat with Database or PDF")
@@ -27,7 +31,7 @@ def main():
 
         # Input for the MySQL connection URI
         mysql_uri = st.text_input("Enter your MySQL connection URI",
-                                  value='mysql+mysqlconnector://root:Kaka1234!!@localhost:3306/chinook')
+                                  value="mysql+mysqlconnector://root:" + str(MYSQL_PASSWORD) + "@localhost:3306/" + str(DB_NAME))
 
         # Input for the user's database query
         user_question = st.text_input("Ask a question about the database",
