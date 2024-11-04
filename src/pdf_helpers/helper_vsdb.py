@@ -1,3 +1,5 @@
+from langchain_community.document_loaders import PyPDFLoader
+
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import pdfplumber
 from langchain.schema import Document  
@@ -8,6 +10,17 @@ import os
 import shutil
 from langchain_community.vectorstores import Chroma
 from pdf_helpers.helper_llm import embeddings
+
+def load_split_pdf(file_path):
+    # Load documents from the PDF file
+    loader = PyPDFLoader(file_path)
+    documents = loader.load()
+
+    # Split documents into manageable chunks
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=0) # Old 500, 100
+    docs = text_splitter.split_documents(documents)
+
+    return docs
 
 def load_and_split_pdfs(uploaded_files):
     """
