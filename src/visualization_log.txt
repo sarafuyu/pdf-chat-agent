@@ -7,13 +7,13 @@ Documents in the Collection:
 Document ID: 0
 Embedding: [ 0.03205208  0.00683998  0.08882725  0.08194935 -0.02037348]...
 Metadata: {'chunk_id': 0, 'page': 0, 'source': 'data/pdfs/Animal_facts.pdf'}
-Document Content: Fun Animal Facts  
-Introduction  
+Document Content: Fun Animal Facts 
+Introduction 
 The animal kingdom is filled with incredible creatures, each possessing unique characteristics 
 and behaviors that never cease to amaze us. From the depths of the ocean to the heights of the 
-savannah, animals showcase a variety of adaptations that help them  thrive in their 
+savannah, animals showcase a variety of adaptations that help them thrive in their 
 environments. Here are some fun and fascinating animal facts that highlight the wonders of 
-nature.  
+nature. 
 1. Octopus Hearts
 -----
 
@@ -22,37 +22,37 @@ Embedding: [ 0.00386983  0.00115175  0.01818517 -0.0164017  -0.10797606]...
 Metadata: {'chunk_id': 1, 'page': 0, 'source': 'data/pdfs/Animal_facts.pdf'}
 Document Content: Did you know that octopuses have three hearts? Two of these hearts pump blood to the gills, 
 while the third heart circulates it to the rest of the body. This unique circulatory system helps 
-them thrive in their underwater habitats.  
-2. Giraffe Tongues  
+them thrive in their underwater habitats. 
+2. Giraffe Tongues 
 Giraffes possess long, prehensile tongues that can reach up to 20 inches! Their tongues are a 
 dark blue color, which helps protect them from sunburn as they stretch to eat leaves from tall 
-trees.  
+trees. 
 3. Dolphin Communication
 -----
 
 Document ID: 2
-Embedding: [ 0.05036597 -0.01651573  0.06142441  0.06408574  0.01099453]...
+Embedding: [ 0.05299454 -0.02759874  0.05982949  0.05967152  0.01555798]...
 Metadata: {'chunk_id': 2, 'page': 0, 'source': 'data/pdfs/Animal_facts.pdf'}
 Document Content: Dolphins are highly intelligent creatures known for their complex social structures. They 
 communicate using a variety of clicks, whistles, and body language, allowing them to 
-coordinate activities and maintain social bonds.  
-4. Elephant Memory  
+coordinate activities and maintain social bonds. 
+4. Elephant Memory 
 Elephants are renowned for their impressive memory. They can remember the locations of 
 water holes and other vital resources for years, a skill that is crucial for their survival in the 
-wild, especially in challenging environments.
+wild, especially in challenging environments. 
+5. Panda Poop
 -----
 
 Document ID: 3
-Embedding: [0.01660522 0.00775899 0.05810187 0.09371155 0.00753293]...
+Embedding: [0.01640675 0.01635446 0.05609924 0.09931355 0.02249358]...
 Metadata: {'chunk_id': 3, 'page': 0, 'source': 'data/pdfs/Animal_facts.pdf'}
-Document Content: 5. Panda Poop  
-Giant pandas can poop up to 40 times a day! Their diet consists mainly of bamboo, which is 
+Document Content: Giant pandas can poop up to 40 times a day! Their diet consists mainly of bamboo, which is 
 low in nutrients. To obtain enough energy, they consume large amounts of bamboo 
-throughout the day.  
-Summary  
+throughout the day. 
+Summary 
 These quirky traits showcase just how diverse and fascinating the animal kingdom is. From 
 the heart structure of octopuses to the remarkable memory of elephants, each animal has 
-adapted in unique ways to survive and thrive. Understanding these incredible f acts not only
+adapted in unique ways to survive and thrive. Understanding these incredible facts not only
 -----
 
 Document ID: 4

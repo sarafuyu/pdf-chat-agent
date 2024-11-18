@@ -166,3 +166,4 @@ cython_debug/
 
 # Ignore log file
 output_log.txt
+src/visualization_log.txt
