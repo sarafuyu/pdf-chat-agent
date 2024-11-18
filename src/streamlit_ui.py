@@ -1,6 +1,6 @@
 import streamlit as st
 from agent_logic import database_agent, pdf_agent, load_css
-from pdf_helpers.helper_vsdb import reset_vector_store_db, create_vectorstore, create_retriever
+from pdf_helpers.helper_vsdb import reset_vector_store_db, create_vectorstore, create_retriever, create_db
 from ui_helpers.helper_chat_history import display_chat_history
 import os
 
@@ -81,7 +81,7 @@ def main():
             if st.button("Process Files"):
                 with st.spinner("Processing PDFs..."):
                     # Create the vector store and database retriever
-                    st.session_state.pdf_db = create_vectorstore(uploaded_files)
+                    st.session_state.pdf_db = create_db(uploaded_files)
                     st.session_state.pdf_retriever = create_retriever(st.session_state.pdf_db)
 
         # User question field for PDF questions

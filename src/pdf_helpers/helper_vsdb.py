@@ -22,6 +22,21 @@ def load_split_pdf(file_path):
 
     return docs
 
+def save_pdfs(uploaded_files):
+    # Save the uploaded PDFs to temporary files
+    file_paths = []
+    for i, uploaded_file in enumerate(uploaded_files):
+        file_path = f"data/pdfs/temp_pdf_{i}.pdf"
+        with open(file_path, "wb") as f:
+            f.write(uploaded_file.getbuffer())
+        file_paths.append(file_path)
+
+    # Load and process the PDFs
+    docs = []
+    for file_path in file_paths:
+        docs.extend(load_split_pdf(file_path))
+    return docs
+
 def load_and_split_pdfs(uploaded_files):
     """
     Load and split PDF documents from uploaded files without saving to disk.
@@ -61,13 +76,60 @@ def reset_vector_store_db(persist_directory="./data/chroma"):
 
 def create_vectorstore(uploaded_files):
     # Process uploaded files and split into appropriate chunks
-    docs = load_and_split_pdfs(uploaded_files)
+    docs = save_pdfs(uploaded_files) # load_and_split_pdfs
 
     # Create Chroma vector database from documents
     persist_directory = "./data/chroma" # Path to store the Chroma database
     db = Chroma.from_documents(documents=docs, embedding=embeddings, persist_directory=persist_directory)
 
     return db
+
+import tempfile
+
+def create_db(uploaded_files):
+    """
+    Create a Chroma vectorstore database from the uploaded PDF files.
+
+    Args:
+        uploaded_files (list): List of uploaded PDF files from Streamlit file_uploader.
+
+    Returns:
+        Chroma vectorstore instance.
+    """
+    # Initialize an empty list to hold all documents
+    docs = []
+
+    
+    # Save the uploaded file to a temporary file
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
+        tmp_file.write(uploaded_files.getbuffer())
+        tmp_file_path = tmp_file.name
+
+    # Load the PDF document
+    loader = PyPDFLoader(tmp_file_path)
+    documents = loader.load()
+
+    # Split the document into chunks
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=0)
+    split_docs = text_splitter.split_documents(documents)
+
+    # Add split documents to the list
+    docs.extend(split_docs)
+
+    # Remove the temporary file
+    os.remove(tmp_file_path)
+
+    # Create embeddings and add to vectorstore (Chroma)
+    persist_directory = "./data/chroma"  # Directory to persist the Chroma database
+
+    # Initialize Chroma vectorstore
+    vectorstore = Chroma.from_documents(
+        documents=docs,
+        embedding=embeddings,
+        persist_directory=persist_directory
+    )
+
+    return vectorstore  
 
 def create_retriever(db):
     # Define retriever for similarity search
