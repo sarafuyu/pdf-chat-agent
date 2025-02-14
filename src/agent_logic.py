@@ -1,9 +1,11 @@
+from langchain_community.utilities import SQLDatabase
 from db_helpers.helper_database import get_schema, run_query
 from db_helpers.helper_prompt import generate_sql_query, generate_final_answer
-from langchain_community.utilities import SQLDatabase
 import traceback
+
 from pdf_helpers.helper_conversation_chain import create_qa_chain
 import re
+
 import streamlit as st
 
 # Database chat agent logic
@@ -59,7 +61,6 @@ def pdf_agent(retriever, user_question, chat_history=[]):
 
     answer = response.get('answer', 'No answer generated.')
     source_documents = response.get('source_documents', [])
-    top_source = source_documents[0].page_content
 
     # Extract the answer between <ANSWER></ANSWER>
     pattern = r'<ANSWER>\s*(.*?)\s*</ANSWER>'
@@ -70,7 +71,7 @@ def pdf_agent(retriever, user_question, chat_history=[]):
         # If tags are missing, return the entire answer
         answer = answer.strip()
 
-    return answer, top_source
+    return answer, source_documents
 
 # Load custom CSS
 def load_css(file_name):
